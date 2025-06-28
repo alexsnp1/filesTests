@@ -1,4 +1,5 @@
 import com.codeborne.pdftest.PDF;
+import com.codeborne.xlstest.XLS;
 import com.opencsv.CSVReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,12 @@ public class TestsWithFiles {
                     PDF pdf = new PDF(zis);
                     Assertions.assertTrue(pdf.text.contains("This PDF is three pages long"));
                     Assertions.assertEquals("Philip Hutchison", pdf.author);
+                }
+                if (entry.getName().equals("person.xls")) {
+                    XLS xls = new XLS(zis);
+                    String actualValue = xls.excel.getSheetAt(0).getRow(2).getCell(2).getStringCellValue();
+                    Assertions.assertTrue(actualValue.contains("Hashimoto"));
+
                 }
                 }
             }
