@@ -1,12 +1,13 @@
 import com.codeborne.pdftest.PDF;
 import com.codeborne.xlstest.XLS;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -36,7 +37,37 @@ public class TestsWithFiles {
                     Assertions.assertTrue(actualValue.contains("Hashimoto"));
 
                 }
+                if (entry.getName().equals("username.csv")) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        baos.write(buffer, 0, len);
+                    }
+
+                    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+                    try (CSVReader csvReader = new CSVReaderBuilder(new InputStreamReader(bais))
+                            .withCSVParser(new CSVParserBuilder().withSeparator(';').build())
+                            .build())
+                    {
+                        List<String[]> data = csvReader.readAll()
+                                .stream()
+                                .filter(row -> row.length > 0 && !row[0].trim().isEmpty())
+                                .map(row -> Arrays.stream(row).map(String::trim).toArray(String[]::new))
+                                .toList();
+                        Assertions.assertEquals(6, data.size());
+                        Assertions.assertArrayEquals(
+                                new String[] {"Username" , "Identifier", "First name", "Last name"},
+                                data.get(0)
+                        );
+                        Assertions.assertArrayEquals(
+                                new String[] {"booker12" , "9012", "Rachel", "Booker"},
+                                data.get(1)
+                        );
+                    }
                 }
             }
         }
     }
+}
