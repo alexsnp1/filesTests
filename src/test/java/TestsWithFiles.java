@@ -1,5 +1,7 @@
 import com.codeborne.pdftest.PDF;
 import com.codeborne.xlstest.XLS;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -7,16 +9,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
-
 public class TestsWithFiles {
     private ClassLoader cl = TestsWithFiles.class.getClassLoader();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void zipFileTest() throws Exception {
@@ -68,6 +69,23 @@ public class TestsWithFiles {
                     }
                 }
             }
+        }
+    }
+    @Test
+    void jsonFileTest() throws Exception {
+        try (InputStream input = cl.getResourceAsStream("IPhone.json")) {
+            JsonNode actual = objectMapper.readTree(input);
+            Assertions.assertEquals("IPhone 16 Pro Max", actual.get("model").asText());
+            Assertions.assertEquals(1200, actual.get("price").asInt());
+            Assertions.assertEquals(true, actual.get("MagSafe").asBoolean());
+
+            List<String> expectedResistance = List.of("splash", "water", "dust");
+            List<String> actualResistance = new ArrayList<>();
+            for (JsonNode res : actual.get("Resistance")) {
+                actualResistance.add(res.asText());
+            }
+            Assertions.assertEquals(expectedResistance, actualResistance);
+
         }
     }
 }

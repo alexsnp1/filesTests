@@ -1,0 +1,13 @@
+{
+  "model" : "IPhone 16 Pro Max",
+  "price" : 1200,
+  "Display" : 6.9,
+  "Cameras" : {
+    "main" : "48mp",
+    "front": "12mp",
+    "telephoto": "13p",
+    "ultra-wide": "14mp"
+  },
+  "Resistance" : ["splash", "water", "dust"],
+  "MagSafe" : true
+}
