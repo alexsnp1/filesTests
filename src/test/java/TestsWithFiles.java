@@ -20,7 +20,7 @@ public class TestsWithFiles {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void zipFileTest() throws Exception {
+    void pdfInsideZipTest() throws Exception {
         try (ZipInputStream zis = new ZipInputStream(
                 cl.getResourceAsStream("file.zip")
         )) {
@@ -32,12 +32,34 @@ public class TestsWithFiles {
                     Assertions.assertTrue(pdf.text.contains("This PDF is three pages long"));
                     Assertions.assertEquals("Philip Hutchison", pdf.author);
                 }
+            }
+        }
+    }
+    @Test
+    void xlsInsideZipTest() throws Exception {
+        try (ZipInputStream zis = new ZipInputStream(
+                cl.getResourceAsStream("file.zip")
+        )) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                System.out.println(entry.getName());
                 if (entry.getName().equals("person.xls")) {
                     XLS xls = new XLS(zis);
                     String actualValue = xls.excel.getSheetAt(0).getRow(2).getCell(2).getStringCellValue();
                     Assertions.assertTrue(actualValue.contains("Hashimoto"));
 
                 }
+            }
+        }
+    }
+    @Test
+    void csvInsideZipTest() throws Exception {
+        try (ZipInputStream zis = new ZipInputStream(
+                cl.getResourceAsStream("file.zip")
+        )) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                System.out.println(entry.getName());
                 if (entry.getName().equals("username.csv")) {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
@@ -45,9 +67,7 @@ public class TestsWithFiles {
                     while ((len = zis.read(buffer)) > 0) {
                         baos.write(buffer, 0, len);
                     }
-
                     ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-
                     try (CSVReader csvReader = new CSVReaderBuilder(new InputStreamReader(bais))
                             .withCSVParser(new CSVParserBuilder().withSeparator(';').build())
                             .build())
